@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\VideoRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -47,6 +49,14 @@ class Video
     #[ORM\Column(length: 100)]
     #[Groups(['video:read', 'video:write'])]
     private ?string $video_quality = null;
+
+    #[ORM\ManyToMany(targetEntity: Folder::class, mappedBy: 'video')]
+    private Collection $folders;
+
+    public function __construct()
+    {
+        $this->folders = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -97,6 +107,33 @@ class Video
     public function setVideoQuality(string $video_quality): static
     {
         $this->video_quality = $video_quality;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Folder>
+     */
+    public function getFolders(): Collection
+    {
+        return $this->folders;
+    }
+
+    public function addFolder(Folder $folder): static
+    {
+        if (!$this->folders->contains($folder)) {
+            $this->folders->add($folder);
+            $folder->addVideo($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFolder(Folder $folder): static
+    {
+        if ($this->folders->removeElement($folder)) {
+            $folder->removeVideo($this);
+        }
 
         return $this;
     }
