@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\Delete;
 use App\Repository\VideoRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -10,18 +11,39 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\GetCollection;
-
+use App\Controller\ImportVideo;
 
 #[ORM\Entity(repositoryClass: VideoRepository::class)]
 #[ApiResource(
     operations: [
-        new Get(),
+        new Post(
+            name: 'videos_import_csv',
+            controller: ImportVideo::class,
+            uriTemplate: '/videos/import',
+            deserialize:false,
+            validationContext: [],
+            openapiContext: [
+                "summary" => "Import Category CSV",
+                "requestBody"=> ["required" => false, "content" => []],
+                "description" => "Get the currently authenticated user.",
+                "parameters"=> [],
+                "responses"=> [
+                    "200" => [
+                        "description" =>"CSV imported successfully"
+                    ]
+                ]
+            ],
+        ),
+        new Get(
+            name: 'videos_id',
+            uriTemplate: '/videos/{id}',
+            requirements: ['id' => '\d+']
+        ),
         new GetCollection()
     ],
-    normalizationContext: [
-        'groups' => ['video:read'],
-    ],
+    normalizationContext: ['groups' => ['video:read']],
     denormalizationContext: [
         'groups' => ['video:write']
     ]
@@ -29,7 +51,7 @@ use ApiPlatform\Metadata\GetCollection;
 class Video
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
+    #[ORM\GeneratedValue(strategy: 'NONE')]
     #[ORM\Column]
     #[Groups(['video:read'])]
     private ?int $id = null;
@@ -61,6 +83,13 @@ class Video
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getName(): ?string
