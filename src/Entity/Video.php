@@ -72,11 +72,16 @@ class Video
     private ?string $video_quality = null;
 
     #[ORM\ManyToMany(targetEntity: Folder::class, mappedBy: 'video')]
+    #[Groups(['report:read'])]
     private Collection $folders;
+
+    #[ORM\ManyToMany(targetEntity: Report::class, mappedBy: 'videos')]
+    private Collection $reports;
 
     public function __construct()
     {
         $this->folders = new ArrayCollection();
+        $this->reports = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -161,6 +166,33 @@ class Video
     {
         if ($this->folders->removeElement($folder)) {
             $folder->removeVideo($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Report>
+     */
+    public function getReports(): Collection
+    {
+        return $this->reports;
+    }
+
+    public function addReport(Report $report): static
+    {
+        if (!$this->reports->contains($report)) {
+            $this->reports->add($report);
+            $report->addVideo($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReport(Report $report): static
+    {
+        if ($this->reports->removeElement($report)) {
+            $report->removeVideo($this);
         }
 
         return $this;

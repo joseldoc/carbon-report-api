@@ -37,7 +37,7 @@ use App\Controller\ImportFolder;
         new GetCollection()
     ],
     normalizationContext: [
-        'groups' => ['folder:read', 'video:read'],
+        'groups' => ['folder:read', 'video:read', 'report:read', 'timeStamp'],
     ],
     denormalizationContext: [
         'groups' => ['folder:write']
@@ -48,15 +48,14 @@ class Folder
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
     #[ORM\Column]
-    #[Groups(['folder:read'])]
+    #[Groups(['folder:read', 'report:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['folder:read', 'folder:write'])]
+    #[Groups(['folder:read', 'folder:write', 'report:read'])]
     private ?string $dossier = null;
 
     #[ORM\ManyToMany(targetEntity: Video::class, inversedBy: 'folders')]
-    #[Groups(['folder:read', 'video:read'])]
     private Collection $video;
 
     public function __construct()
