@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use App\Service\ReadCsvFile;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\HttpKernel\Attribute\AsController;
 
 #[AsController]
 class ImportFolder extends AbstractController {
@@ -30,18 +31,18 @@ class ImportFolder extends AbstractController {
             $video = $this->entityManager->getRepository(Video::class)->find($record['video']);
             if($folder) { // Verify if Folder exist
                 $folder->addVideo($video);
+                $this->entityManager->flush();
             } else {
                 // Create Folder
                 $folder = new Folder();
                 $folder->setId($record['id']);
                 $folder->setDossier($record['dossier']);
                 $folder->addVideo($video);
+                $this->entityManager->persist($video);
                 $this->entityManager->flush();
             }
-            $this->entityManager->persist($folder);
-        }
-        $this->entityManager->flush();
 
+        }
         return new JsonResponse('Import successfull', Response::HTTP_OK);
     }
 }

@@ -16,7 +16,7 @@ use App\Controller\ImportEncoder;
 #[ApiResource(
     operations: [
         new Post(
-            name: 'videos_import_csv',
+            name: 'videos_encode_import_csv',
             controller: ImportEncoder::class,
             uriTemplate: '/video_encodes/import',
             deserialize:false,
@@ -36,7 +36,7 @@ use App\Controller\ImportEncoder;
         new GetCollection()
     ],
     normalizationContext: [
-        'groups' => ['encoder:read', 'video:read'],
+        'groups' => ['encoder:read', 'video:read', 'report: read'],
     ],
     denormalizationContext: [
         'groups' => ['encoder:write']
@@ -47,7 +47,7 @@ class VideoEncode
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
     #[ORM\Column]
-    #[Groups(['encoder:read'])]
+    #[Groups(['encoder:read', 'report:read'])]
     private ?int $id = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
@@ -56,11 +56,11 @@ class VideoEncode
     private ?Video $video = null;
 
     #[ORM\Column(type: Types::BIGINT)]
-    #[Groups(['encoder:read', 'encoder:write'])]
+    #[Groups(['encoder:read', 'encoder:write', 'report:read'])]
     private ?string $size = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['encoder:read', 'encoder:write'])]
+    #[Groups(['encoder:read', 'encoder:write', 'report:read'])]
     private ?string $quality = null;
 
     public function getId(): ?int
